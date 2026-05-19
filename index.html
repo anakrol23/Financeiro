@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0062)file:///C:/Users/profi/Downloads/controle-financeiro-v2_2.html -->
-<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Controle Financeiro</title>
-<link href="./index_files/css2" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════
    TOKENS
@@ -399,7 +399,8 @@ select.inp{cursor:pointer;}
     <div class="login-logo">💰</div>
     <div class="login-title">Controle Financeiro</div>
     <div class="login-sub">Acesso protegido — seus dados, só seus</div>
-    <input class="login-inp" type="password" id="login-senha" placeholder="Digite sua senha" onkeydown="if(event.key===&#39;Enter&#39;)doLogin()">
+    <input class="login-inp" type="password" id="login-senha" placeholder="Digite sua senha"
+           onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Entrar</button>
     <div class="login-err" id="login-err">Senha incorreta. Tente novamente.</div>
   </div>
@@ -431,13 +432,13 @@ select.inp{cursor:pointer;}
 
     <!-- NAV -->
     <div class="nav-wrap">
-      <button class="nav-btn active" onclick="showTab(&#39;resumo&#39;,this)">📊 Resumo</button>
-      <button class="nav-btn" onclick="showTab(&#39;contas&#39;,this)">💳 Contas &amp; Cartões</button>
-      <button class="nav-btn" onclick="showTab(&#39;diario&#39;,this)">🧾 Gastos do dia</button>
-      <button class="nav-btn" onclick="showTab(&#39;bancarias&#39;,this)">🏦 Contas bancárias</button>
-      <button class="nav-btn" onclick="showTab(&#39;objetivos&#39;,this)">🎯 Objetivos</button>
-      <button class="nav-btn" onclick="showTab(&#39;relatorio&#39;,this)">📈 Relatório</button>
-      <button class="nav-btn" onclick="showTab(&#39;config&#39;,this)">⚙️ Config</button>
+      <button class="nav-btn active" onclick="showTab('resumo',this)">📊 Resumo</button>
+      <button class="nav-btn" onclick="showTab('contas',this)">💳 Contas &amp; Cartões</button>
+      <button class="nav-btn" onclick="showTab('diario',this)">🧾 Gastos do dia</button>
+      <button class="nav-btn" onclick="showTab('bancarias',this)">🏦 Contas bancárias</button>
+      <button class="nav-btn" onclick="showTab('objetivos',this)">🎯 Objetivos</button>
+      <button class="nav-btn" onclick="showTab('relatorio',this)">📈 Relatório</button>
+      <button class="nav-btn" onclick="showTab('config',this)">⚙️ Config</button>
     </div>
 
     <!-- ══ RESUMO ══ -->
@@ -626,7 +627,7 @@ select.inp{cursor:pointer;}
         <div class="card">
           <div class="card-title">
             Categorias
-            <button class="btn btn-g btn-xs" onclick="toggleEl(&#39;nova-cat-form&#39;)">+ Nova</button>
+            <button class="btn btn-g btn-xs" onclick="toggleEl('nova-cat-form')">+ Nova</button>
           </div>
           <div id="cats-list" style="margin-bottom:8px;"></div>
           <div id="nova-cat-form" style="display:none;">
@@ -686,7 +687,7 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Data lançamento</label><input class="inp" id="e-data" type="date" style="width:100%;"></div>
     <div class="field"><label class="inp-label">Data vencimento</label><input class="inp" id="e-venc-data" type="date" style="width:100%;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-edit&#39;)">Cancelar</button><button class="btn btn-b" onclick="salvarEdicao()">Salvar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit')">Cancelar</button><button class="btn btn-b" onclick="salvarEdicao()">Salvar</button></div>
 </div></div>
 
 <!-- EDITAR DIÁRIO -->
@@ -701,7 +702,7 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Categoria</label><select class="inp" id="ed-cat" style="width:100%;"></select></div>
     <div class="field"><label class="inp-label">Observação</label><input class="inp" id="ed-obs" type="text" style="width:100%;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-edit-diario&#39;)">Cancelar</button><button class="btn btn-b" onclick="salvarEdicaoDiario()">Salvar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-edit-diario')">Cancelar</button><button class="btn btn-b" onclick="salvarEdicaoDiario()">Salvar</button></div>
 </div></div>
 
 <!-- MARCAR PAGO -->
@@ -712,7 +713,7 @@ select.inp{cursor:pointer;}
     <label class="inp-label">Descontar de qual conta?</label>
     <select class="inp" id="pago-conta" style="width:100%;"><option value="">-- Não descontar --</option></select>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-pago&#39;)">Cancelar</button><button class="btn btn-g" onclick="confirmarPagamento()">✅ Confirmar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-pago')">Cancelar</button><button class="btn btn-g" onclick="confirmarPagamento()">✅ Confirmar</button></div>
 </div></div>
 
 <!-- NOVA CONTA BANCÁRIA -->
@@ -726,7 +727,7 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Saldo inicial (R$)</label><input class="inp" id="cb-saldo" type="number" placeholder="0,00" style="width:100%;"></div>
     <div class="field"><label class="inp-label">Cor</label><input class="inp" id="cb-cor" type="color" value="#185FA5" style="width:100%;padding:2px;cursor:pointer;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-nova-conta&#39;)">Cancelar</button><button class="btn btn-g" onclick="salvarNovaConta()">Criar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-nova-conta')">Cancelar</button><button class="btn btn-g" onclick="salvarNovaConta()">Criar</button></div>
 </div></div>
 
 <!-- ATUALIZAR SALDO -->
@@ -741,7 +742,7 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Descrição</label><input class="inp" id="saldo-obs" type="text" placeholder="Ex: Salário, saque..." style="width:100%;"></div>
   </div>
   <div id="saldo-preview" style="font-size:12px;color:var(--text2);padding:.5rem .75rem;background:var(--surface2);border-radius:var(--r);margin-bottom:.5rem;"></div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-saldo&#39;)">Cancelar</button><button class="btn btn-g" onclick="confirmarSaldo()">Confirmar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-saldo')">Cancelar</button><button class="btn btn-g" onclick="confirmarSaldo()">Confirmar</button></div>
 </div></div>
 
 <!-- TRANSFERÊNCIA -->
@@ -755,7 +756,7 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Valor (R$)</label><input class="inp" id="transf-val" type="number" placeholder="0,00" style="width:100%;"></div>
     <div class="field"><label class="inp-label">Descrição</label><input class="inp" id="transf-obs" type="text" placeholder="Ex: Reserva mensal" style="width:100%;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-transf&#39;)">Cancelar</button><button class="btn btn-g" onclick="confirmarTransf()">Transferir</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-transf')">Cancelar</button><button class="btn btn-g" onclick="confirmarTransf()">Transferir</button></div>
 </div></div>
 
 <!-- OBJETIVO -->
@@ -772,7 +773,7 @@ select.inp{cursor:pointer;}
   <div class="form-grid form-grid-2" style="margin-bottom:8px;">
     <div class="field"><label class="inp-label">Cor</label><input class="inp" id="obj-cor" type="color" value="#1D9E75" style="width:100%;padding:2px;cursor:pointer;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-obj&#39;)">Cancelar</button><button class="btn btn-g" id="btn-obj-salvar" onclick="salvarObjetivo()">Criar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-obj')">Cancelar</button><button class="btn btn-g" id="btn-obj-salvar" onclick="salvarObjetivo()">Criar</button></div>
 </div></div>
 
 <!-- APORTE OBJETIVO -->
@@ -783,102 +784,22 @@ select.inp{cursor:pointer;}
     <div class="field"><label class="inp-label">Operação</label><select class="inp" id="aporte-tipo" style="width:100%;"><option value="entrada">+ Aportar (adicionar)</option><option value="saida">− Retirar (remover)</option></select></div>
     <div class="field"><label class="inp-label">Valor (R$)</label><input class="inp" id="aporte-val" type="number" placeholder="0,00" style="width:100%;"></div>
   </div>
-  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal(&#39;modal-aporte&#39;)">Cancelar</button><button class="btn btn-g" onclick="confirmarAporte()">Confirmar</button></div>
+  <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modal-aporte')">Cancelar</button><button class="btn btn-g" onclick="confirmarAporte()">Confirmar</button></div>
 </div></div>
 
-<script src="./index_files/chart.umd.js.transferir"></script>
-<!-- Firebase -->
-<script type="module">
-'use strict';
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey: "AIzaSyBUQFwUevPbLTFVtZ8fZ3Z4cWetcGHzvAw",
   authDomain: "controle-financeiro-496711.firebaseapp.com",
+  databaseURL: "https://controle-financeiro-496711-default-rtdb.firebaseio.com",
   projectId: "controle-financeiro-496711",
   storageBucket: "controle-financeiro-496711.firebasestorage.app",
   messagingSenderId: "716602863797",
   appId: "1:716602863797:web:698f4ef1acde778b67cefc"
-};
-
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-const DOC_REF = doc(db, "dados", "principal");
-
-// Salva no Firestore
-async function salvarNuvem(data) {
-  try {
-    // Firestore não aceita objetos muito grandes num único doc — usamos chunks
-    const chunks = splitChunks(data);
-    for(const [key, val] of Object.entries(chunks)) {
-      await setDoc(doc(db, "dados", key), val, { merge: true });
-    }
-    document.getElementById('save-dot').style.background = 'var(--green)';
-    document.getElementById('save-txt').textContent = 'Salvo na nuvem ☁️ ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  } catch(e) {
-    console.error('Erro Firebase:', e);
-    document.getElementById('save-dot').style.background = 'var(--orange)';
-    document.getElementById('save-txt').textContent = 'Salvo local (sem nuvem)';
-    // Fallback para localStorage
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-}
-
-// Carrega do Firestore
-async function carregarNuvem() {
-  try {
-    document.getElementById('save-txt').textContent = 'Conectando à nuvem...';
-    const snap = await getDoc(doc(db, "dados", "meta"));
-    if(snap.exists()) {
-      // Carrega todos os chunks
-      const meta = snap.data();
-      const chunkKeys = meta.chunks || ["principal"];
-      let merged = {};
-      for(const k of chunkKeys) {
-        const s = await getDoc(doc(db, "dados", k));
-        if(s.exists()) merged = deepMerge(merged, s.data());
-      }
-      return merged;
-    }
-    return null;
-  } catch(e) {
-    console.error('Erro ao carregar Firebase:', e);
-    return null;
-  }
-}
-
-function splitChunks(data) {
-  // Separa contas/diario (grande) de meta (pequeno) para não ultrapassar 1MB do Firestore
-  const { contas, diario, rendas, ...meta } = data;
-  return {
-    "meta": { ...meta, chunks: ["meta", "contas", "diario", "rendas"] },
-    "contas": { contas: contas || {} },
-    "diario": { diario: diario || {} },
-    "rendas": { rendas: rendas || {} }
-  };
-}
-
-function deepMerge(a, b) {
-  const result = { ...a };
-  for(const k of Object.keys(b)) {
-    if(b[k] && typeof b[k] === 'object' && !Array.isArray(b[k])) {
-      result[k] = deepMerge(a[k] || {}, b[k]);
-    } else {
-      result[k] = b[k];
-    }
-  }
-  return result;
-}
-
-// Expõe funções para o código principal
-window._fbSalvar = salvarNuvem;
-window._fbCarregar = carregarNuvem;
-window._fbPronto = true;
-
-// Dispara evento para o código principal saber que Firebase está pronto
-window.dispatchEvent(new Event('firebase-ready'));
+});
 </script>
 <script>
 'use strict';
@@ -902,18 +823,7 @@ function doLogin(){
   if(v===getSenha()){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
-    // Aguarda Firebase estar pronto antes de carregar
-    if(window._fbPronto) {
-      carregarDados().then(()=>init());
-    } else {
-      window.addEventListener('firebase-ready', ()=>{
-        carregarDados().then(()=>init());
-      }, {once:true});
-      // Timeout de segurança — se Firebase demorar, carrega do local
-      setTimeout(()=>{
-        if(!state) carregarDados().then(()=>init());
-      }, 4000);
-    }
+    carregarDados().then(()=>init());
   }else{
     document.getElementById('login-err').style.display='block';
     document.getElementById('login-senha').value='';
@@ -1051,44 +961,46 @@ function contasFiltradas(k){
 }
 
 // ═══════════════════════════════════════
-// PERSIST — FIREBASE + LOCALSTORAGE FALLBACK
+// PERSIST — REALTIME DATABASE + LOCALSTORAGE FALLBACK
 // ═══════════════════════════════════════
 let saveTimer, cloudSaveTimer;
+const rtdb = firebase.database();
+const DB_PATH = 'dados/principal';
 
 function salvarDados() {
-  // Salva local imediatamente
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-  // Salva na nuvem com debounce (evita muitas escritas)
   clearTimeout(cloudSaveTimer);
   document.getElementById('save-dot').style.background = 'var(--orange)';
   document.getElementById('save-txt').textContent = 'Salvando...';
   cloudSaveTimer = setTimeout(async () => {
-    if(window._fbPronto) {
-      await window._fbSalvar(state);
-    } else {
+    try {
+      await rtdb.ref(DB_PATH).set(JSON.parse(JSON.stringify(state)));
       document.getElementById('save-dot').style.background = 'var(--green)';
-      document.getElementById('save-txt').textContent = 'Salvo localmente';
+      document.getElementById('save-txt').textContent = 'Salvo na nuvem ☁️ ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    } catch(e) {
+      console.error('Firebase erro:', e);
+      document.getElementById('save-dot').style.background = 'var(--orange)';
+      document.getElementById('save-txt').textContent = 'Salvo local (sem conexão)';
     }
   }, 1200);
 }
 
 async function carregarDados() {
-  document.getElementById('save-txt').textContent = 'Carregando...';
+  document.getElementById('save-txt').textContent = 'Conectando à nuvem...';
   let dados = null;
-
-  // Tenta Firebase primeiro
-  if(window._fbPronto) {
-    dados = await window._fbCarregar();
+  try {
+    const snap = await rtdb.ref(DB_PATH).get();
+    if(snap.exists()) dados = snap.val();
+  } catch(e) {
+    console.error('Firebase carregar erro:', e);
   }
-
-  // Fallback: localStorage
+  // Fallback localStorage
   if(!dados) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if(raw) dados = JSON.parse(raw);
     } catch(e) {}
   }
-
   if(dados) {
     state = { ...defaultState(), ...dados };
     getAllKeys().forEach(k => ensureKey(k));
@@ -2065,6 +1977,5 @@ function init(){
 // Foco no login
 document.getElementById('login-senha').focus();
 </script>
-
-
-</body></html>
+</body>
+</html>
