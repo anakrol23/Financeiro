@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Controle Financeiro</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#1B6B4A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Financeiro">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 /* ═══════════════════════════════════════════
    TOKENS
@@ -810,7 +815,7 @@ firebase.auth().signInAnonymously().catch(e=>console.warn('Auth:', e));
 // ═══════════════════════════════════════
 // CONSTANTES & ESTADO
 // ═══════════════════════════════════════
-const SENHA_KEY='cf_senha_v2';
+const SENHA_KEY='cf_senha_v3';
 const STORAGE_KEY='carol_fin_v7';
 const NOMES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const ANOS_BASE=[2025,2026,2027];
@@ -840,7 +845,7 @@ function doLogout(){
   document.getElementById('login-senha').value='';
   document.getElementById('login-err').style.display='none';
 }
-function alterarSenha(){
+async function alterarSenha(){
   const cur=document.getElementById('senha-atual').value;
   const nv=document.getElementById('senha-nova').value;
   const cf=document.getElementById('senha-conf').value;
@@ -848,8 +853,8 @@ function alterarSenha(){
   if(cur!==getSenha()){msg.style.color='var(--red2)';msg.textContent='Senha atual incorreta.';return;}
   if(!nv||nv.length<4){msg.style.color='var(--red2)';msg.textContent='Nova senha muito curta (mín. 4 caracteres).';return;}
   if(nv!==cf){msg.style.color='var(--red2)';msg.textContent='As senhas não coincidem.';return;}
-  localStorage.setItem(SENHA_KEY,nv);
-  msg.style.color='var(--green)';msg.textContent='✅ Senha alterada!';
+  await salvarSenha(nv);
+  msg.style.color='var(--green)';msg.textContent='✅ Senha alterada e sincronizada!';
   ['senha-atual','senha-nova','senha-conf'].forEach(id=>document.getElementById(id).value='');
 }
 
@@ -970,34 +975,63 @@ function contasFiltradas(k){
 let saveTimer, cloudSaveTimer;
 const rtdb = firebase.database();
 const DB_PATH = 'dados/principal';
+const SENHA_PATH = 'config/senha';
+
+// Senha — salva e carrega do Firebase para sincronizar entre dispositivos
+const getSenha = () => localStorage.getItem(SENHA_KEY) || 'senha123';
+
+async function salvarSenha(novaSenha) {
+  localStorage.setItem(SENHA_KEY, novaSenha);
+  try { await rtdb.ref(SENHA_PATH).set(novaSenha); } catch(e) {}
+}
+
+async function carregarSenha() {
+  try {
+    const snap = await rtdb.ref(SENHA_PATH).get();
+    if(snap.exists()) {
+      localStorage.setItem(SENHA_KEY, snap.val());
+    }
+  } catch(e) {}
+}
 
 function salvarDados() {
+  // Salva local imediatamente
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
   clearTimeout(cloudSaveTimer);
   document.getElementById('save-dot').style.background = 'var(--orange)';
   document.getElementById('save-txt').textContent = 'Salvando...';
   cloudSaveTimer = setTimeout(async () => {
     try {
-      await rtdb.ref(DB_PATH).set(JSON.parse(JSON.stringify(state)));
+      // Serializa e desserializa para limpar undefined/funções
+      const payload = JSON.parse(JSON.stringify(state));
+      await rtdb.ref(DB_PATH).set(payload);
       document.getElementById('save-dot').style.background = 'var(--green)';
       document.getElementById('save-txt').textContent = 'Salvo na nuvem ☁️ ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     } catch(e) {
       console.error('Firebase erro:', e);
       document.getElementById('save-dot').style.background = 'var(--orange)';
-      document.getElementById('save-txt').textContent = 'Salvo local (sem conexão)';
+      document.getElementById('save-txt').textContent = 'Salvo local (verificar conexão)';
     }
-  }, 1200);
+  }, 1500);
 }
 
 async function carregarDados() {
   document.getElementById('save-txt').textContent = 'Conectando à nuvem...';
+
+  // Carrega senha sincronizada
+  await carregarSenha();
+
   let dados = null;
+  // Tenta Firebase primeiro
   try {
     const snap = await rtdb.ref(DB_PATH).get();
-    if(snap.exists()) dados = snap.val();
+    if(snap.exists()) {
+      dados = snap.val();
+    }
   } catch(e) {
     console.error('Firebase carregar erro:', e);
   }
+
   // Fallback localStorage
   if(!dados) {
     try {
@@ -1005,15 +1039,82 @@ async function carregarDados() {
       if(raw) dados = JSON.parse(raw);
     } catch(e) {}
   }
-  if(dados) {
-    state = { ...defaultState(), ...dados };
+
+  if(dados && Object.keys(dados).length > 0) {
+    const def = defaultState();
+    // Merge cuidadoso — preserva arrays do Firebase
+    state = { ...def, ...dados };
+    // Garante que objetos críticos existam
+    if(!state.categorias || !state.categorias.length) state.categorias = def.categorias;
+    if(!state.contasBancarias) state.contasBancarias = def.contasBancarias;
+    if(!state.objetivos) state.objetivos = def.objetivos;
+    if(!state.rendasFixas) state.rendasFixas = def.rendasFixas;
+    if(!state.contas) state.contas = {};
+    if(!state.diario) state.diario = {};
+    if(!state.rendas) state.rendas = {};
     getAllKeys().forEach(k => ensureKey(k));
-    if(!state.contasBancarias) state.contasBancarias = defaultState().contasBancarias;
     document.getElementById('save-txt').textContent = 'Dados carregados ✓';
+    // Atualiza localStorage com dados frescos do Firebase
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
   } else {
     state = defaultState();
     seedDados();
     salvarDados();
+  }
+}
+
+function agendar() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(salvarDados, 800);
+}
+
+function exportarDados() {
+  try {
+    const payload = JSON.parse(JSON.stringify(state));
+    const b = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'financeiro_backup_' + todayStr() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(e) { alert('Erro ao exportar: ' + e.message); }
+}
+
+function importarDados(e) {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const texto = ev.target.result.trim();
+      const d = JSON.parse(texto);
+      if(!d || typeof d !== 'object') throw new Error('Formato inválido');
+      if(confirm('Substituir todos os dados pelo backup?')) {
+        const def = defaultState();
+        state = { ...def, ...d };
+        if(!state.categorias || !state.categorias.length) state.categorias = def.categorias;
+        if(!state.contasBancarias) state.contasBancarias = def.contasBancarias;
+        getAllKeys().forEach(k => ensureKey(k));
+        salvarDados();
+        init();
+        alert('✅ Importado com sucesso!');
+      }
+    } catch(err) {
+      alert('❌ Arquivo inválido: ' + err.message);
+    }
+  };
+  r.onerror = () => alert('❌ Erro ao ler o arquivo.');
+  r.readAsText(f, 'UTF-8');
+}
+
+function resetarDados() {
+  if(confirm('Tem certeza? Apaga TUDO permanentemente.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    rtdb.ref(DB_PATH).remove().catch(()=>{});
+    state = defaultState();
+    seedDados();
+    salvarDados();
+    init();
   }
 }
 
@@ -1909,77 +2010,4 @@ function salvarObjetivo(){
 function abrirAporte(i){
   aporteIdx=i;const o=state.objetivos[i];
   document.getElementById('modal-aporte-title').textContent='Movimentar — '+o.nome;
-  document.getElementById('aporte-info').innerHTML=`Guardado: <strong>${fmt(o.atual)}</strong> · Meta: <strong>${fmt(o.meta)}</strong> · Falta: <strong>${fmt(Math.max(0,o.meta-o.atual))}</strong>`;
-  document.getElementById('aporte-val').value='';document.getElementById('aporte-tipo').value='entrada';
-  openModal('modal-aporte');
-}
-function confirmarAporte(){
-  if(aporteIdx===null)return;
-  const v=parseFloat(document.getElementById('aporte-val').value);
-  const tipo=document.getElementById('aporte-tipo').value;
-  if(isNaN(v)||v<=0)return;
-  const o=state.objetivos[aporteIdx];
-  if(tipo==='entrada')o.atual=Math.min(o.meta,o.atual+v);
-  else o.atual=Math.max(0,o.atual-v);
-  closeModal('modal-aporte');agendar();renderObjetivos();
-}
-function delObjetivo(i){if(confirm('Remover objetivo?')){state.objetivos.splice(i,1);agendar();renderObjetivos();}}
-
-// ═══════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════
-function addCategoria(){
-  const nome=document.getElementById('new-cat-nome').value.trim();
-  const cor=document.getElementById('new-cat-cor').value;
-  if(!nome||state.categorias.find(c=>c.nome===nome))return;
-  state.categorias.push({nome,cor});
-  document.getElementById('new-cat-nome').value='';
-  populateCatSelects();renderCatsConfig();agendar();
-}
-function delCategoria(i){if(confirm('Remover categoria?')){state.categorias.splice(i,1);populateCatSelects();renderCatsConfig();agendar();}}
-function addRendaFixa(){
-  const desc=document.getElementById('rf-desc').value.trim(),val=parseFloat(document.getElementById('rf-val').value);
-  if(!desc||isNaN(val)||val<=0)return;
-  state.rendasFixas.push({desc,val});
-  getAllKeys().forEach(k=>{ensureKey(k);state.rendas[k].push({desc,val,fixed:true});});
-  document.getElementById('rf-desc').value='';document.getElementById('rf-val').value='';
-  renderRendasFixasConfig();agendar();render();
-}
-function delRendaFixa(i){
-  if(!confirm('Remover renda fixa de todos os meses?'))return;
-  const desc=state.rendasFixas[i].desc;
-  state.rendasFixas.splice(i,1);
-  getAllKeys().forEach(k=>{if(state.rendas[k])state.rendas[k]=state.rendas[k].filter(r=>!r.fixed||r.desc!==desc);});
-  renderRendasFixasConfig();agendar();render();
-}
-
-// ═══════════════════════════════════════
-// MODAL HELPERS
-// ═══════════════════════════════════════
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-  editIdx=null;editDiarioIdx=null;pagoCtx=null;contaBancariaIdx=null;aporteIdx=null;editObjIdx=null;
-}
-document.querySelectorAll('.modal-bg').forEach(el=>{
-  el.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);});
-});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-function init(){
-  initDark();
-  document.getElementById('d-data').value=todayStr();
-  document.getElementById('c-data').value=todayStr();
-  previewMes();toggleCartaoOpts();
-  populateCatSelects();renderCatsConfig();renderRendasFixasConfig();
-  buildPeriod();render();
-}
-
-// Foco no login
-document.getElementById('login-senha').focus();
-</script>
-</body>
-</html>
+  document.getElementById('aporte-info').in
