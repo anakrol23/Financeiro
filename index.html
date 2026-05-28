@@ -826,6 +826,13 @@ let charts={};
 // ═══════════════════════════════════════
 // SENHA & AUTH
 // ═══════════════════════════════════════
+// Limpa chaves antigas de senha para evitar conflito
+['cf_senha','cf_senha_v2'].forEach(k=>{
+  const v=localStorage.getItem(k);
+  if(v&&!localStorage.getItem(SENHA_KEY)){localStorage.setItem(SENHA_KEY,v);}
+  localStorage.removeItem(k);
+});
+
 const getSenha=()=>localStorage.getItem(SENHA_KEY)||'senha123';
 function doLogin(){
   const v=document.getElementById('login-senha').value;
@@ -1850,7 +1857,35 @@ function salvarEdicao(){
   closeModal('modal-edit');agendar();render();
 }
 
-function delConta(k,i){if(confirm('Remover este lançamento?')){state.contas[k].splice(i,1);agendar();render();}}
+function delConta(k,i){
+  const c=state.contas[k][i];
+  // Se for parcelado com mais de 1 parcela, pergunta o que fazer
+  if(c.parcTotal>1 && c.grupoId){
+    const opcao=confirm(
+      `"${c.desc}" é parcelado (${c.parcAtual}/${c.parcTotal}).\n\n` +
+      `✅ OK = Excluir TODAS as parcelas pendentes\n` +
+      `❌ Cancelar = Excluir só este mês`
+    );
+    if(opcao){
+      // Exclui todas as parcelas não pagas do mesmo grupo
+      let total=0;
+      getAllKeys().forEach(mk=>{
+        if(!state.contas[mk]) return;
+        const antes=state.contas[mk].length;
+        state.contas[mk]=state.contas[mk].filter(x=>!(x.grupoId===c.grupoId && !x.pago));
+        total+=antes-state.contas[mk].length;
+      });
+      // Mantém as já pagas
+    }else{
+      // Só remove do mês atual
+      state.contas[k].splice(i,1);
+    }
+  }else{
+    if(!confirm(`Excluir "${c.desc}"?`)) return;
+    state.contas[k].splice(i,1);
+  }
+  agendar();render();
+}
 
 // ═══════════════════════════════════════
 // GASTOS DIÁRIOS
@@ -1990,24 +2025,4 @@ function abrirEditarObj(i){
   editObjIdx=i;const o=state.objetivos[i];
   document.getElementById('modal-obj-title').textContent='✏️ Editar objetivo';
   document.getElementById('btn-obj-salvar').textContent='Salvar';
-  document.getElementById('obj-nome').value=o.nome;document.getElementById('obj-meta').value=o.meta;
-  document.getElementById('obj-atual').value=o.atual;document.getElementById('obj-prazo').value=o.prazo||'';
-  document.getElementById('obj-cor').value=o.cor||'#1D9E75';
-  openModal('modal-obj');
-}
-function salvarObjetivo(){
-  const nome=document.getElementById('obj-nome').value.trim();
-  const meta=parseFloat(document.getElementById('obj-meta').value);
-  const atual=parseFloat(document.getElementById('obj-atual').value)||0;
-  const prazo=document.getElementById('obj-prazo').value.trim();
-  const cor=document.getElementById('obj-cor').value||'#1D9E75';
-  if(!nome||isNaN(meta)||meta<=0)return;
-  const obj={nome,meta,atual,prazo,cor};
-  if(editObjIdx!==null)state.objetivos[editObjIdx]=obj;
-  else state.objetivos.push(obj);
-  closeModal('modal-obj');agendar();renderObjetivos();
-}
-function abrirAporte(i){
-  aporteIdx=i;const o=state.objetivos[i];
-  document.getElementById('modal-aporte-title').textContent='Movimentar — '+o.nome;
-  document.getElementById('aporte-info').in
+  document.getE
