@@ -826,14 +826,12 @@ let charts={};
 // ═══════════════════════════════════════
 // SENHA & AUTH
 // ═══════════════════════════════════════
-// Limpa chaves antigas de senha para evitar conflito
-['cf_senha','cf_senha_v2'].forEach(k=>{
-  const v=localStorage.getItem(k);
-  if(v&&!localStorage.getItem(SENHA_KEY)){localStorage.setItem(SENHA_KEY,v);}
-  localStorage.removeItem(k);
-});
+// Limpa chaves antigas
+['cf_senha','cf_senha_v2','cf_senha_v3'].forEach(k=>localStorage.removeItem(k));
+// Define senha correta
+localStorage.setItem('cf_senha_v3','teamo123');
 
-const getSenha=()=>localStorage.getItem(SENHA_KEY)||'senha123';
+const getSenha=()=>'teamo123';
 function doLogin(){
   const v=document.getElementById('login-senha').value;
   if(v===getSenha()){
@@ -2025,4 +2023,104 @@ function abrirEditarObj(i){
   editObjIdx=i;const o=state.objetivos[i];
   document.getElementById('modal-obj-title').textContent='✏️ Editar objetivo';
   document.getElementById('btn-obj-salvar').textContent='Salvar';
-  document.getE
+  document.getElementById('obj-nome').value=o.nome;document.getElementById('obj-meta').value=o.meta;
+  document.getElementById('obj-atual').value=o.atual;document.getElementById('obj-prazo').value=o.prazo||'';
+  document.getElementById('obj-cor').value=o.cor||'#1D9E75';
+  openModal('modal-obj');
+}
+function salvarObjetivo(){
+  const nome=document.getElementById('obj-nome').value.trim();
+  const meta=parseFloat(document.getElementById('obj-meta').value);
+  const atual=parseFloat(document.getElementById('obj-atual').value)||0;
+  const prazo=document.getElementById('obj-prazo').value.trim();
+  const cor=document.getElementById('obj-cor').value||'#1D9E75';
+  if(!nome||isNaN(meta)||meta<=0)return;
+  const obj={nome,meta,atual,prazo,cor};
+  if(editObjIdx!==null)state.objetivos[editObjIdx]=obj;
+  else state.objetivos.push(obj);
+  closeModal('modal-obj');agendar();renderObjetivos();
+}
+function abrirAporte(i){
+  aporteIdx=i;const o=state.objetivos[i];
+  document.getElementById('modal-aporte-title').textContent='Movimentar — '+o.nome;
+  document.getElementById('aporte-info').innerHTML=`Guardado: <strong>${fmt(o.atual)}</strong> · Meta: <strong>${fmt(o.meta)}</strong> · Falta: <strong>${fmt(Math.max(0,o.meta-o.atual))}</strong>`;
+  document.getElementById('aporte-val').value='';document.getElementById('aporte-tipo').value='entrada';
+  openModal('modal-aporte');
+}
+function confirmarAporte(){
+  if(aporteIdx===null)return;
+  const v=parseFloat(document.getElementById('aporte-val').value);
+  const tipo=document.getElementById('aporte-tipo').value;
+  if(isNaN(v)||v<=0)return;
+  const o=state.objetivos[aporteIdx];
+  if(tipo==='entrada')o.atual=Math.min(o.meta,o.atual+v);
+  else o.atual=Math.max(0,o.atual-v);
+  closeModal('modal-aporte');agendar();renderObjetivos();
+}
+function delObjetivo(i){if(confirm('Remover objetivo?')){state.objetivos.splice(i,1);agendar();renderObjetivos();}}
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+function addCategoria(){
+  const nome=document.getElementById('new-cat-nome').value.trim();
+  const cor=document.getElementById('new-cat-cor').value;
+  if(!nome||state.categorias.find(c=>c.nome===nome))return;
+  state.categorias.push({nome,cor});
+  document.getElementById('new-cat-nome').value='';
+  populateCatSelects();renderCatsConfig();agendar();
+}
+function delCategoria(i){if(confirm('Remover categoria?')){state.categorias.splice(i,1);populateCatSelects();renderCatsConfig();agendar();}}
+function addRendaFixa(){
+  const desc=document.getElementById('rf-desc').value.trim(),val=parseFloat(document.getElementById('rf-val').value);
+  if(!desc||isNaN(val)||val<=0)return;
+  state.rendasFixas.push({desc,val});
+  getAllKeys().forEach(k=>{ensureKey(k);state.rendas[k].push({desc,val,fixed:true});});
+  document.getElementById('rf-desc').value='';document.getElementById('rf-val').value='';
+  renderRendasFixasConfig();agendar();render();
+}
+function delRendaFixa(i){
+  if(!confirm('Remover renda fixa de todos os meses?'))return;
+  const desc=state.rendasFixas[i].desc;
+  state.rendasFixas.splice(i,1);
+  getAllKeys().forEach(k=>{if(state.rendas[k])state.rendas[k]=state.rendas[k].filter(r=>!r.fixed||r.desc!==desc);});
+  renderRendasFixasConfig();agendar();render();
+}
+
+// ═══════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  editIdx=null;editDiarioIdx=null;pagoCtx=null;contaBancariaIdx=null;aporteIdx=null;editObjIdx=null;
+}
+document.querySelectorAll('.modal-bg').forEach(el=>{
+  el.addEventListener('click',function(e){if(e.target===this)closeModal(this.id);});
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-bg.open').forEach(m=>closeModal(m.id));});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function init(){
+  initDark();
+  document.getElementById('d-data').value=todayStr();
+  document.getElementById('c-data').value=todayStr();
+  previewMes();toggleCartaoOpts();
+  populateCatSelects();renderCatsConfig();renderRendasFixasConfig();
+  buildPeriod();render();
+}
+
+// Foco no login
+document.getElementById('login-senha').focus();
+
+// Registra Service Worker para PWA
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW:', e));
+  });
+}
+</script>
+</body>
+</html>
