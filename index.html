@@ -793,9 +793,9 @@ select.inp{cursor:pointer;}
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyBUQFwUevPbLTFVtZ8fZ3Z4cWetcGHzvAw",
@@ -806,8 +806,6 @@ firebase.initializeApp({
   messagingSenderId: "716602863797",
   appId: "1:716602863797:web:698f4ef1acde778b67cefc"
 });
-
-// Login anônimo automático — necessário para acessar o banco com regras seguras
 firebase.auth().signInAnonymously().catch(e=>console.warn('Auth:', e));
 </script>
 <script>
@@ -830,8 +828,6 @@ let charts={};
 ['cf_senha','cf_senha_v2','cf_senha_v3'].forEach(k=>localStorage.removeItem(k));
 // Define senha correta
 localStorage.setItem('cf_senha_v3','teamo123');
-
-const getSenha=()=>'teamo123';
 function doLogin(){
   const v=document.getElementById('login-senha').value;
   if(v===getSenha()){
@@ -983,7 +979,7 @@ const DB_PATH = 'dados/principal';
 const SENHA_PATH = 'config/senha';
 
 // Senha — salva e carrega do Firebase para sincronizar entre dispositivos
-const getSenha = () => localStorage.getItem(SENHA_KEY) || 'senha123';
+const getSenha = () => localStorage.getItem('cf_senha_v3') || 'teamo123';
 
 async function salvarSenha(novaSenha) {
   localStorage.setItem(SENHA_KEY, novaSenha);
